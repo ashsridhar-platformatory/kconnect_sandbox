@@ -28,6 +28,14 @@ Deliverables
 2: Report on studying JDBC Conenctor	
 3: Load script
 
+----------TODO---------------
+Based on call with Avinash
+1. Helm chart
+	-Gather all Kubernetes manifest files - Done
+	-Replace necessary parts with placeholders
+	-Configure values.yaml appropriately
+
+---------------------------
 
 Activity log:
 1. Have Kubernetes cluster up and running (3 nodes EKS from AWS)
