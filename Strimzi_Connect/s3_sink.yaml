@@ -1,0 +1,36 @@
+# To use the KafkaConnector resource, you have to first enable the connector operator using
+# the strimzi.io/use-connector-resources annotation on the KafkaConnect custom resource.
+# From Apache Kafka 3.1.1 and 3.2.0, you also have to add the FileStreamSourceConnector
+# connector to the container image. You can do that using the kafka-connect-build.yaml example.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: strimzi-s3-sink
+  namespace: <Your namespace>
+  labels:
+    # The strimzi.io/cluster label identifies the KafkaConnect instance
+    # in which to create this connector. That KafkaConnect instance
+    # must have the strimzi.io/use-connector-resources annotation
+    # set to true.
+    strimzi.io/cluster: <Name of your Kafka connect resource>
+spec:
+  class: io.confluent.connect.s3.S3SinkConnector
+  tasksMax: 1
+  autoRestart:
+    enabled: true
+  config:
+    storage.class: io.confluent.connect.s3.storage.S3Storage
+    format.class: io.confluent.connect.s3.format.avro.AvroFormat
+    s3.bucket.name: <Name of your S3 bucket>
+    s3.region: <S3 Bucket region>
+    s3.part.size: <S3 part size>
+    flush.size: <S3 flush size>
+    topics: <Kafka topic or list of topics>
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: io.confluent.connect.avro.AvroConverter
+    value.converter.schema.registry.url: <Your schema registry URL>
+    value.converter.basic.auth.credentials.source: <Schema registry credential source>
+    value.converter.schema.registry.basic.auth.user.info: <Schema registry credential info>
+    schema.compatibility: NONE
+    schema.generator.class: io.confluent.connect.storage.hive.schema.DefaultSchemaGenerator
+    partitioner.class: io.confluent.connect.storage.partitioner.DefaultPartitioner

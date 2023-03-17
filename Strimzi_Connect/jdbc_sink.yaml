@@ -1,0 +1,37 @@
+# To use the KafkaConnector resource, you have to first enable the connector operator using
+# the strimzi.io/use-connector-resources annotation on the KafkaConnect custom resource.
+# From Apache Kafka 3.1.1 and 3.2.0, you also have to add the FileStreamSourceConnector
+# connector to the container image. You can do that using the kafka-connect-build.yaml example.
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnector
+metadata:
+  name: strimzi-jdbc-sink
+  namespace: <namespace>
+  labels:
+    # The strimzi.io/cluster label identifies the KafkaConnect instance
+    # in which to create this connector. That KafkaConnect instance
+    # must have the strimzi.io/use-connector-resources annotation
+    # set to true.
+    strimzi.io/cluster: <Name of the created Kafka Connect resource>
+spec:
+  class: io.confluent.connect.jdbc.JdbcSinkConnector
+  tasksMax: 1
+  autoRestart:
+    enabled: true
+  config:
+    connector.class: io.confluent.connect.jdbc.JdbcSinkConnector
+    connection.url: <JDBC Connection URL>
+    connection.user: <JDBC User>
+    connection.password: <JDBC Password>
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: io.confluent.connect.avro.AvroConverter
+    value.converter.schema.registry.url: <Schema Registry URL>
+    #Optional
+    #transforms: "flatten"
+    #transforms.flatten.type: "org.apache.kafka.connect.transforms.Flatten$Value"
+    #transforms.flatten.delimiter": "_"
+    topics: <Your Kafka topic or list of topics>
+    auto.create: true
+    value.converter.basic.auth.credentials.source: <Schema registry credential source>
+    value.converter.schema.registry.basic.auth.user.info: <schema registry auth info>
+

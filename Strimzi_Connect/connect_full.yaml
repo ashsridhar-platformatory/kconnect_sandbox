@@ -1,0 +1,55 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaConnect
+metadata:
+  name: <Kafka connect name>
+  namespace: <namespace>
+  annotations:
+    strimzi.io/use-connector-resources: "true"
+#  # use-connector-resources configures this KafkaConnect
+#  # to use KafkaConnector resources to avoid
+#  # needing to call the Connect REST API directly
+   
+spec:
+  version: 3.3.2
+  replicas: 1
+  bootstrapServers: <Your CC broker URL>
+  authentication:
+    type: plain
+    username: <Your username to access>
+    passwordSecret:
+      secretName: brokerpass
+      password: password
+  tls:
+    trustedCertificates: []
+  externalConfiguration:
+    env:
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom:
+          secretKeyRef:
+            name: aws-creds
+            key: awsAccessKey  
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef:
+            name: aws-creds
+            key: awsSecretAccessKey
+  image: ashsridhar/strconnect-jdbc-s3:1.0.0          
+  config:
+    group.id: connect-strimzi
+    offset.storage.topic: connect-cluster-offsets
+    config.storage.topic: connect-cluster-configs
+    status.storage.topic: connect-cluster-status
+    # -1 means it will use the default replication factor configured in the broker
+    config.storage.replication.factor: -1
+    offset.storage.replication.factor: -1
+    status.storage.replication.factor: -1
+  #build:
+   # output:
+    #  type: docker
+      # This image will last only for 24 hours and might be overwritten by other users
+      # Strimzi will use this tag to push the image. But it will use the digest to pull
+      # the container image to make sure it pulls exactly the image we just built. So
+      # it should not happen that you pull someone else's container image. However, we
+      # recommend changing this to your own container registry or using a different
+      # image name for any other than demo purposes.
+     # image: https://hub.docker.com/r/ashsridhar/strconnect-jdbc-s3
